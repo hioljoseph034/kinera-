@@ -59,7 +59,7 @@
     live: {
       enabled: true,                  // false = affiche "hors ligne"
       title: "Direct en cours",
-      channelId: "UCxxxxxxxxxxxxxxxxxxxxxx"  // ID de votre chaîne YouTube (commence par UC)
+      channel: "hioljoseph034"  // votre nom d'utilisateur Twitch (en minuscules)
     },
 
     // Vidéos à la demande, hébergées sur Internet Archive
@@ -76,13 +76,13 @@
         category: "Films", type: "archive", id: "mon-identifiant-archive-4" }
     ],
 
-    // Rediffusions : directs passés, déjà archivés sur YouTube
-    // "id" = identifiant présent dans l'URL youtube.com/watch?v=IDENTIFIANT
+    // Rediffusions : directs passés archivés sur Twitch
+    // "type" = "twitch" (ID numérique de l'URL twitch.tv/videos/ID) ou "youtube"
     replays: [
       { title: "Direct du 12 octobre", desc: "Replay complet du live.", date: "2026-10-12", color: "#ea580c",
-        type: "youtube", id: "VIDEO_ID_1" },
+        type: "twitch", id: "123456789" },
       { title: "Direct du 28 octobre", desc: "Replay complet du live.", date: "2026-10-28", color: "#db2777",
-        type: "youtube", id: "VIDEO_ID_2" }
+        type: "twitch", id: "123456790" }
     ]
   };
   </script>
@@ -113,17 +113,26 @@
   </div>
 </div>
 
-<footer>Kinera · Site hébergé sur GitHub Pages · Direct via YouTube · Vidéos via Internet Archive</footer>
+<footer>Kinera · Site hébergé sur GitHub Pages · Direct via Twitch · Vidéos via Internet Archive</footer>
 
 <script>
   const $ = (id) => document.getElementById(id);
 
   // Construit l'URL d'intégration selon la plateforme
   function embedUrl(item) {
+    if (item.type === "twitch") {
+      return twitchUrl("video=v" + encodeURIComponent(item.id));
+    }
     if (item.type === "youtube") {
       return "https://www.youtube.com/embed/" + encodeURIComponent(item.id) + "?autoplay=1&rel=0";
     }
     return "https://archive.org/embed/" + encodeURIComponent(item.id);
+  }
+
+  // Twitch exige le nom de domaine du site dans "parent" (GitHub Pages ou localhost)
+  function twitchUrl(params) {
+    const parent = location.hostname || "localhost";
+    return "https://player.twitch.tv/?" + params + "&parent=" + encodeURIComponent(parent);
   }
 
   function makeIframe(src) {
@@ -145,7 +154,7 @@
       return;
     }
     box.appendChild(makeIframe(
-      "https://www.youtube.com/embed/live_stream?channel=" + encodeURIComponent(CONFIG.live.channelId)
+      twitchUrl("channel=" + encodeURIComponent(CONFIG.live.channel))
     ));
     $("live-badge").style.display = "inline-block";
     status.textContent = CONFIG.live.title;
